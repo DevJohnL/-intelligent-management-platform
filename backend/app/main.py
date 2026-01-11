@@ -14,11 +14,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(categories.router)
-app.include_router(products.router)
-app.include_router(sales.router)
-app.include_router(dashboard.router)
-app.include_router(ingestion.router)
+app.include_router(categories)
+app.include_router(products)
+app.include_router(sales)
+app.include_router(dashboard)
+app.include_router(ingestion)
 
 
 @app.get("/")
