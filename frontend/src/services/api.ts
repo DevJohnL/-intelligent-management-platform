@@ -20,3 +20,44 @@ export const fetchSales = async () => {
   return data
 }
 
+export const fetchCategories = async () => {
+  const { data } = await api.get("/categories")
+  return data
+}
+
+export const fetchProducts = async () => {
+  const { data } = await api.get("/products")
+  return data
+}
+
+export const createProduct = async (payload: {
+  name: string
+  price: number
+  cost_price: number
+  category_id: number
+}) => {
+  const { data } = await api.post("/products", payload)
+  return data
+}
+
+export const createSale = async (payload: {
+  product_id: number
+  quantity: number
+  total_price: number
+  date: string
+}) => {
+  const { data } = await api.post("/sales", payload)
+  return data
+}
+
+export const uploadCsv = async (entity: string, file: File) => {
+  const formData = new FormData()
+  formData.append("file", file)
+  const { data } = await api.post(`/ingest/csv/${entity}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  })
+  return data
+}
+
