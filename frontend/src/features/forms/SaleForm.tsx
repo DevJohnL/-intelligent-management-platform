@@ -1,99 +1,106 @@
-import { FormEvent, useState } from "react"
+import { Button, Card, DatePicker, Form, InputNumber, Select, Typography } from "antd"
+import dayjs from "dayjs"
 
 import { useProducts } from "../../hooks/useProducts"
 import { useCreateSale } from "../../hooks/useCreateSale"
 
-type SaleFormState = {
-  product_id: string
-  quantity: string
-  total_price: string
-  date: string
-}
+const { Text } = Typography
 
-const initialState: SaleFormState = {
-  product_id: "",
-  quantity: "",
-  total_price: "",
-  date: "",
+type SaleFormValues = {
+  product_id: number
+  quantity: number
+  total_price: number
+  date: dayjs.ConfigType
 }
 
 const SaleForm = () => {
+  const [form] = Form.useForm()
   const { data: products, isLoading: loadingProducts } = useProducts()
   const mutation = useCreateSale()
-  const [form, setForm] = useState(initialState)
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
-    if (!form.product_id) return
-
+  const onFinish = async (values: SaleFormValues) => {
     await mutation.mutateAsync({
-      product_id: Number(form.product_id),
-      quantity: Number(form.quantity),
-      total_price: Number(form.total_price),
-      date: form.date,
+      product_id: Number(values.product_id),
+      quantity: Number(values.quantity),
+      total_price: Number(values.total_price),
+      date: dayjs(values.date).format("YYYY-MM-DD"),
     })
-    setForm(initialState)
+    form.resetFields()
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">Registrar venda</p>
-      <select
-        value={form.product_id}
-        onChange={(event) => setForm((prev) => ({ ...prev, product_id: event.target.value }))}
-        className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white"
-        required
-        disabled={loadingProducts}
+    <Card
+      className="bg-slate-900/60 border border-white/10 shadow-2xl !flex !flex-col !items-center !justify-center"
+      size="small"
+      title="Registrar venda"
+      headStyle={{ padding: 0 }}
+      bodyStyle={{ padding: "1rem" }}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        requiredMark={false}
+        className="space-y-4"
       >
-        <option value="">Produto</option>
-        {products?.map((product: { id: number; name: string }) => (
-          <option key={product.id} value={product.id}>
-            {product.name}
-          </option>
-        ))}
-      </select>
-      <div className="grid gap-3 md:grid-cols-2">
-        <input
-          placeholder="Quantidade"
-          value={form.quantity}
-          onChange={(event) => setForm((prev) => ({ ...prev, quantity: event.target.value }))}
-          className="rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-slate-500"
-          type="number"
-          min="1"
-          required
-        />
-        <input
-          placeholder="Total (BRL)"
-          value={form.total_price}
-          onChange={(event) => setForm((prev) => ({ ...prev, total_price: event.target.value }))}
-          className="rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-slate-500"
-          type="number"
-          min="0"
-          step="0.01"
-          required
-        />
-      </div>
-      <input
-        type="date"
-        value={form.date}
-        onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
-        className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white"
-        required
-      />
-      <button
-        type="submit"
-        className="w-full rounded-xl bg-slate-700/80 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-600 disabled:cursor-not-allowed disabled:opacity-70"
-        disabled={mutation.isLoading}
-      >
-        {mutation.isLoading ? "Registrando..." : "Adicionar venda"}
-      </button>
-      {mutation.isSuccess && (
-        <p className="text-xs text-emerald-400">Venda registrada.</p>
-      )}
-      {mutation.isError && (
-        <p className="text-xs text-amber-400">Não foi possível registrar.</p>
-      )}
-    </form>
+        <Form.Item
+          name="product_id"
+          label="Produto"
+          rules={[{ required: true, message: "Selecione o produto" }]}
+        >
+          <Select
+            placeholder="Selecione"
+            loading={loadingProducts}
+            options={products?.map((product: { id: number; name: string }) => ({
+              label: product.name,
+              value: product.id,
+            }))}
+          />
+        </Form.Item>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <Form.Item
+            name="quantity"
+            label="Quantidade"
+            rules={[{ required: true, message: "Informe a quantidade" }]}
+            className="m-0"
+          >
+            <InputNumber min={1} size="large" className="w-full" />
+          </Form.Item>
+          <Form.Item
+            name="total_price"
+            label="Total (BRL)"
+            rules={[{ required: true, message: "Informe o valor total" }]}
+            className="m-0"
+          >
+            <InputNumber
+              min={0}
+              step={0.01}
+              size="large"
+              className="w-full"
+              formatter={(value) => (value ?? 0 ? `R$ ${value}` : "")}
+              parser={(value) => Number(value?.replace(/[R$\s,]/g, ""))}
+            />
+          </Form.Item>
+        </div>
+
+        <Form.Item
+          name="date"
+          label="Data"
+          rules={[{ required: true, message: "Informe a data da venda" }]}
+        >
+          <DatePicker className="w-full" format="YYYY-MM-DD" />
+        </Form.Item>
+
+        <Form.Item className="m-0">
+          <Button type="primary" htmlType="submit" block loading={mutation.isLoading}>
+            Adicionar venda
+          </Button>
+        </Form.Item>
+        {mutation.isSuccess && <Text type="success">Venda registrada.</Text>}
+        {mutation.isError && <Text type="warning">Não foi possível registrar.</Text>}
+      </Form>
+    </Card>
   )
 }
 

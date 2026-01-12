@@ -1,104 +1,125 @@
-import { FormEvent, useState } from "react"
+import { Button, Card, Form, Input, InputNumber, Select, Typography } from "antd"
+import { useMemo } from "react"
 
 import { useCategories } from "../../hooks/useCategories"
 import { useCreateProduct } from "../../hooks/useCreateProduct"
 
-type ProductFormState = {
-  name: string
-  price: string
-  cost_price: string
-  category_id: string
+const { Text } = Typography
+
+const layout = {
+  labelCol: { span: 24 },
+  wrapperCol: { span: 24 },
 }
 
-const initialState: ProductFormState = {
-  name: "",
-  price: "",
-  cost_price: "",
-  category_id: "",
+type ProductFormValues = {
+  name: string
+  price: number
+  cost_price: number
+  category_id: number
 }
 
 const ProductForm = () => {
+  const [form] = Form.useForm()
   const { data: categories, isLoading: loadingCategories } = useCategories()
   const mutation = useCreateProduct()
-  const [form, setForm] = useState(initialState)
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
-    if (!form.category_id) return
-
-    await mutation.mutateAsync({
-      name: form.name,
-      price: Number(form.price),
-      cost_price: Number(form.cost_price),
-      category_id: Number(form.category_id),
-    })
-    setForm(initialState)
+  const onFinish = async (values: ProductFormValues) => {
+    const payload = {
+      name: values.name,
+      price: Number(values.price),
+      cost_price: Number(values.cost_price),
+      category_id: Number(values.category_id),
+    }
+    await mutation.mutateAsync(payload)
+    form.resetFields()
   }
 
-  const disabled = mutation.isLoading
+  const footerText = useMemo(() => {
+    if (mutation.isSuccess) return "Produto salvo com sucesso."
+    if (mutation.isError) return "Falha ao salvar. Tente novamente."
+    return null
+  }, [mutation.isError, mutation.isSuccess])
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <p className="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">
-        Cadastrar produto
-      </p>
-      <input
-        placeholder="Nome"
-        value={form.name}
-        onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-        className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-slate-500"
-        required
-      />
-      <div className="grid gap-3 md:grid-cols-2">
-        <input
-          placeholder="Preço"
-          value={form.price}
-          onChange={(event) => setForm((prev) => ({ ...prev, price: event.target.value }))}
-          className="rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-slate-500"
-          type="number"
-          min="0"
-          step="0.01"
-          required
-        />
-        <input
-          placeholder="Custo"
-          value={form.cost_price}
-          onChange={(event) => setForm((prev) => ({ ...prev, cost_price: event.target.value }))}
-          className="rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white placeholder:text-slate-500"
-          type="number"
-          min="0"
-          step="0.01"
-          required
-        />
-      </div>
-      <select
-        value={form.category_id}
-        onChange={(event) => setForm((prev) => ({ ...prev, category_id: event.target.value }))}
-        className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2 text-sm text-white"
-        required
-        disabled={loadingCategories}
+    <Card
+      className="bg-slate-900/60 border border-white/10 shadow-2xl !flex !flex-col !items-center !justify-center"
+      size="small"
+      title="Cadastrar produto"
+      headStyle={{ padding: 0 }}
+      bodyStyle={{ padding: "1rem" }}
+    >
+      <Form
+        {...layout}
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        requiredMark={false}
+        className="space-y-4"
       >
-        <option value="">Categoria</option>
-        {categories?.map((category: { id: number; name: string }) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-      <button
-        type="submit"
-        className="w-full rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold uppercase tracking-[0.3em] text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
-        disabled={disabled}
-      >
-        {mutation.isLoading ? "Enviando..." : "Salvar produto"}
-      </button>
-      {mutation.isSuccess && (
-        <p className="text-xs text-emerald-400">Produto salvo com sucesso.</p>
-      )}
-      {mutation.isError && (
-        <p className="text-xs text-amber-400">Falha ao salvar. Tente novamente.</p>
-      )}
-    </form>
+        <Form.Item
+          name="name"
+          label="Nome"
+          rules={[{ required: true, message: "Informe o nome do produto" }]}
+        >
+          <Input size="large" placeholder="Ex: Samsung 65” QLED" />
+        </Form.Item>
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <Form.Item
+            name="price"
+            label="Preço"
+            rules={[{ required: true, message: "Informe o preço" }]}
+            className="m-0"
+          >
+            <InputNumber
+              min={0}
+              step={0.01}
+              size="large"
+              className="w-full"
+              formatter={(value) => (value ?? 0 ? `R$ ${value}` : "")}
+              parser={(value) => Number(value?.replace(/[R$\s,]/g, ""))}
+            />
+          </Form.Item>
+          <Form.Item
+            name="cost_price"
+            label="Custo"
+            rules={[{ required: true, message: "Informe o custo" }]}
+            className="m-0"
+          >
+            <InputNumber
+              min={0}
+              step={0.01}
+              size="large"
+              className="w-full"
+              formatter={(value) => (value ?? 0 ? `R$ ${value}` : "")}
+              parser={(value) => Number(value?.replace(/[R$\s,]/g, ""))}
+            />
+          </Form.Item>
+        </div>
+
+        <Form.Item
+          name="category_id"
+          label="Categoria"
+          rules={[{ required: true, message: "Escolha uma categoria" }]}
+        >
+          <Select
+            placeholder="Selecione"
+            loading={loadingCategories}
+            options={categories?.map((category: { id: number; name: string }) => ({
+              label: category.name,
+              value: category.id,
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item className="m-0">
+          <Button type="primary" htmlType="submit" block loading={mutation.isLoading}>
+            Salvar produto
+          </Button>
+        </Form.Item>
+        {footerText && <Text type={mutation.isSuccess ? "success" : "warning"}>{footerText}</Text>}
+      </Form>
+    </Card>
   )
 }
 

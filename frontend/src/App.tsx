@@ -1,3 +1,5 @@
+import { Button, Divider, Layout, Typography } from "antd"
+import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons"
 import { useState } from "react"
 
 import DashboardOverview from "./features/dashboard/DashboardOverview"
@@ -5,66 +7,84 @@ import CsvIngestForm from "./features/forms/CsvIngestForm"
 import ProductForm from "./features/forms/ProductForm"
 import SaleForm from "./features/forms/SaleForm"
 
+const { Sider, Content } = Layout
+const { Title, Text } = Typography
+
 const App = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [collapsed, setCollapsed] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-white">
-      {sidebarOpen ? (
-        <aside className="flex w-96 flex-col gap-6 border-r border-white/5 bg-slate-900/70 p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <p className="text-[0.6rem] font-semibold uppercase tracking-[0.6em] text-slate-500">
-                Operações
-              </p>
-              <p className="text-xs text-slate-400">Cadastre dados e envie CSVs</p>
+    <Layout className="min-h-screen bg-slate-950 text-white">
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        width={320}
+        collapsedWidth={92}
+        trigger={null}
+        className="bg-white shadow-2xl border-r border-white/10 text-slate-800"
+        style={collapsed ? { width: 0, minWidth: 0, display: "none" } : undefined}
+      >
+        <div className="flex items-center justify-between px-4 py-4">
+          {!collapsed && (
+            <div>
+              <Title level={5} className="mb-0 text-white">
+                SmartMart Analytics
+              </Title>
+              <Text className="text-slate-400">Operações rápidas</Text>
             </div>
-            <button
-              type="button"
-              onClick={() => setSidebarOpen(false)}
-              className="flex items-center gap-1 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:border-white/40 hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-              aria-label="Recolher painel de operações"
-            >
-              <span className="text-lg leading-none">⊖</span>
-              <span className="text-[0.6rem] tracking-[0.5em] text-slate-300">OCULTAR</span>
-            </button>
-          </div>
-          <div className="space-y-6">
+          )}
+          <Button
+            type="text"
+            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            onClick={() => setCollapsed((prev) => !prev)}
+            className="text-white"
+          />
+        </div>
+
+        <Divider className="border-white/10" />
+
+        {!collapsed && (
+          <div className="space-y-6 px-4">
+            <Title level={6} className="text-slate-400">
+              Operações
+            </Title>
             <ProductForm />
             <SaleForm />
             <CsvIngestForm />
           </div>
-        </aside>
-      ) : (
-        <div className="flex w-16 items-start justify-center px-2 py-4">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="flex items-center justify-center rounded-full border border-white/20 bg-white/0 px-3 py-2 text-white transition hover:border-white/40 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
-            aria-label="Abrir painel de operações"
-          >
-            <span className="sr-only">Abrir painel de operações</span>
-            <span className="flex flex-col gap-1">
-              <span className="h-0.5 w-5 bg-white"></span>
-              <span className="h-0.5 w-5 bg-white"></span>
-              <span className="h-0.5 w-5 bg-white"></span>
-            </span>
-          </button>
+        )}
+
+      </Sider>
+
+      {collapsed && (
+        <div className="fixed left-4 top-4 z-50">
+          <Button
+            type="text"
+            shape="circle"
+            icon={<MenuUnfoldOutlined className="text-white" />}
+            onClick={() => setCollapsed(false)}
+            className="bg-slate-50/80 text-slate-900 hover:bg-white border border-white/40"
+          />
         </div>
       )}
 
-      <main className="flex-1 px-4 py-10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6">
-          <header className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.8em] text-slate-500">
-              SmartMart Analytics
-            </p>
-            <h1 className="text-3xl font-bold sm:text-4xl">Painel executivo de varejo</h1>
-          </header>
-          <DashboardOverview />
-        </div>
-      </main>
-    </div>
+      <Layout>
+        <Content className="px-4 py-10">
+          <div className="mx-auto flex max-w-6xl flex-col gap-6">
+            <header className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.8em] text-slate-500">
+                SmartMart Analytics
+              </p>
+              <h1 className="text-3xl font-bold sm:text-4xl">Painel executivo de varejo</h1>
+
+            </header>
+            <Divider className="border-white/10" />
+            <DashboardOverview />
+          </div>
+        </Content>
+      </Layout>
+    </Layout>
   )
 }
 
