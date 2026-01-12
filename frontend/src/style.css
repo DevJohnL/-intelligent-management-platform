@@ -3,16 +3,56 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --app-bg: #f4f6f9;
+  --app-text: #0f172a;
+  --card-bg: #ffffff;
+  --card-border: rgba(15, 23, 42, 0.12);
+  --divider-color: rgba(15, 23, 42, 0.18);
 }
 
 body {
   min-height: 100vh;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: #020617;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .ant-btn-icon,
 .ant-btn-icon svg {
-  color: #000 !important;
+  color: var(--app-text) !important;
+}
+
+.card-contrast {
+  background-color: var(--card-bg) !important;
+  border-color: var(--card-border) !important;
+  color: var(--app-text) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.card-contrast .ant-card-head-title,
+.card-contrast .ant-card-head {
+  color: inherit;
+}
+
+.card-contrast .ant-form-item-label > label {
+  color: inherit;
+}
+
+.card-contrast .ant-card-body,
+.card-contrast .ant-typography,
+.card-contrast .ant-upload,
+.card-contrast .ant-typography-success,
+.card-contrast .ant-typography-warning,
+.card-contrast .ant-typography-danger {
+  color: inherit;
+}
+
+.divider-theme {
+  border-color: var(--divider-color) !important;
+}
+
+.sider-theme {
+  background-color: #f8fafc !important;
 }

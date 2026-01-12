@@ -53,11 +53,11 @@ const DashboardOverview = () => {
       </div>
 
       {metrics?.alert_message && (
-        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-200">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-amber-200/70">
+        <div className="rounded-2xl border border-slate-200 bg-slate-900/5 p-4 text-slate-700">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">
             Insight inteligente
           </p>
-          <p className="text-lg font-semibold">{metrics.alert_message}</p>
+          <p className="text-sm font-semibold text-slate-800">{metrics.alert_message}</p>
         </div>
       )}
 

@@ -3,6 +3,7 @@ import { useMemo } from "react"
 
 import { useCategories } from "../../hooks/useCategories"
 import { useCreateProduct } from "../../hooks/useCreateProduct"
+import { formatCurrencyInput, parseCurrencyInput } from "../../utils/currencyInput"
 
 const { Text } = Typography
 
@@ -17,6 +18,7 @@ type ProductFormValues = {
   cost_price: number
   category_id: number
 }
+
 
 const ProductForm = () => {
   const [form] = Form.useForm()
@@ -42,10 +44,10 @@ const ProductForm = () => {
 
   return (
     <Card
-      className="bg-slate-900/60 border border-white/10 shadow-2xl !flex !flex-col !items-center !justify-center"
+      className="card-contrast shadow-sm transition hover:shadow-md"
       size="small"
       title="Cadastrar produto"
-      headStyle={{ padding: 0 }}
+      headStyle={{ padding: "0.5rem 0" }}
       bodyStyle={{ padding: "1rem" }}
     >
       <Form
@@ -71,14 +73,14 @@ const ProductForm = () => {
             rules={[{ required: true, message: "Informe o preço" }]}
             className="m-0"
           >
-            <InputNumber
-              min={0}
-              step={0.01}
-              size="large"
-              className="w-full"
-              formatter={(value) => (value ?? 0 ? `R$ ${value}` : "")}
-              parser={(value) => Number(value?.replace(/[R$\s,]/g, ""))}
-            />
+          <InputNumber<number>
+            min={0}
+            step={0.01}
+            size="large"
+            className="w-full"
+            formatter={formatCurrencyInput}
+            parser={parseCurrencyInput}
+          />
           </Form.Item>
           <Form.Item
             name="cost_price"
@@ -86,14 +88,14 @@ const ProductForm = () => {
             rules={[{ required: true, message: "Informe o custo" }]}
             className="m-0"
           >
-            <InputNumber
-              min={0}
-              step={0.01}
-              size="large"
-              className="w-full"
-              formatter={(value) => (value ?? 0 ? `R$ ${value}` : "")}
-              parser={(value) => Number(value?.replace(/[R$\s,]/g, ""))}
-            />
+          <InputNumber<number>
+            min={0}
+            step={0.01}
+            size="large"
+            className="w-full"
+            formatter={formatCurrencyInput}
+            parser={parseCurrencyInput}
+          />
           </Form.Item>
         </div>
 
@@ -113,7 +115,7 @@ const ProductForm = () => {
         </Form.Item>
 
         <Form.Item className="m-0">
-          <Button type="primary" htmlType="submit" block loading={mutation.isLoading}>
+          <Button type="primary" htmlType="submit" block loading={mutation.isPending}>
             Salvar produto
           </Button>
         </Form.Item>

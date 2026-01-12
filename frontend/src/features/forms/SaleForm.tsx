@@ -3,6 +3,7 @@ import dayjs from "dayjs"
 
 import { useProducts } from "../../hooks/useProducts"
 import { useCreateSale } from "../../hooks/useCreateSale"
+import { formatCurrencyInput, parseCurrencyInput } from "../../utils/currencyInput"
 
 const { Text } = Typography
 
@@ -30,10 +31,10 @@ const SaleForm = () => {
 
   return (
     <Card
-      className="bg-slate-900/60 border border-white/10 shadow-2xl !flex !flex-col !items-center !justify-center"
+      className="card-contrast shadow-sm transition hover:shadow-md"
       size="small"
       title="Registrar venda"
-      headStyle={{ padding: 0 }}
+      headStyle={{ padding: "0.5rem 0" }}
       bodyStyle={{ padding: "1rem" }}
     >
       <Form
@@ -73,13 +74,13 @@ const SaleForm = () => {
             rules={[{ required: true, message: "Informe o valor total" }]}
             className="m-0"
           >
-            <InputNumber
+          <InputNumber<number>
               min={0}
               step={0.01}
               size="large"
               className="w-full"
-              formatter={(value) => (value ?? 0 ? `R$ ${value}` : "")}
-              parser={(value) => Number(value?.replace(/[R$\s,]/g, ""))}
+            formatter={formatCurrencyInput}
+            parser={parseCurrencyInput}
             />
           </Form.Item>
         </div>
@@ -93,7 +94,7 @@ const SaleForm = () => {
         </Form.Item>
 
         <Form.Item className="m-0">
-          <Button type="primary" htmlType="submit" block loading={mutation.isLoading}>
+          <Button type="primary" htmlType="submit" block loading={mutation.isPending}>
             Adicionar venda
           </Button>
         </Form.Item>

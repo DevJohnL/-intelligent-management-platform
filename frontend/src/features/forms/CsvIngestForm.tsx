@@ -43,10 +43,10 @@ const CsvIngestForm = () => {
 
   return (
     <Card
-      className="bg-slate-900/60 border border-white/10 shadow-2xl !flex !flex-col !items-center !justify-center "
+      className="card-contrast shadow-sm transition hover:shadow-md"
       size="small"
       title="Upload CSV"
-      headStyle={{ padding: 0 }}
+      headStyle={{ padding: "0.5rem 0" }}
       bodyStyle={{ padding: "1rem" }}
     >
       <Form layout="vertical" requiredMark={false} className="space-y-4">
@@ -67,22 +67,19 @@ const CsvIngestForm = () => {
               maxCount={1}
               fileList={file ? ([file] as any) : []}
               onRemove={() => setFile(undefined)}
-              listType="picture-card"
-              className="rounded-2xl border-white/10 bg-slate-900/40 !flex !flex-col !items-center !justify-center !py-0 overflow-hidden" 
+              listType="text"
+              className="w-full cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 transition hover:border-slate-300"
               showUploadList={false}
             >
-              <div className="flex w-full h-full flex-col items-center justify-center gap-1 text-white/90">
-                <PlusOutlined style={{ fontSize: '1.5rem' }} />
-                <div className="text-sm font-semibold text-center">Upload</div>
+              <div className="flex w-full flex-col items-center justify-center gap-2 py-10 text-slate-500">
+                <PlusOutlined style={{ fontSize: 24 }} />
+                <div className="text-sm font-semibold text-slate-600 text-center">Selecionar ou arrastar</div>
+                {file && (
+                  <p className="text-xs text-slate-500/80 text-center">{file.name}</p>
+                )}
               </div>
             </Upload>
-            
-            <p className="mt-2 text-sm text-white text-center">Arraste o arquivo ou clique para selecionar</p>
-            {file && (
-              <p className="mt-1 text-xs text-white/70 text-center">
-                {file.name}
-              </p>
-            )}
+            <p className="mt-2 text-sm text-slate-500 text-center">Envie um CSV para atualizar os dados corporativos</p>
           </div>
         </Form.Item>
 
