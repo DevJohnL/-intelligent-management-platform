@@ -16,7 +16,7 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value)
 
 const SalesTrendChart = ({ data }: SalesTrendChartProps) => (
-  <div className="h-72 rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm">
+  <div className="h-72 rounded-2xl border border-slate-200 bg-white/90 p-7 shadow-sm">
     <div className="mb-2 flex items-center justify-between">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-slate-500">Tendência</p>
@@ -48,7 +48,7 @@ const SalesTrendChart = ({ data }: SalesTrendChartProps) => (
           tickMargin={12}
         />
         <Tooltip
-          contentStyle={{ backgroundColor: "#0f172a", border: "none" }}
+          contentStyle={{ backgroundColor: "white", border: "none" }}
           formatter={(value: number) => formatCurrency(value)}
         />
         <Area

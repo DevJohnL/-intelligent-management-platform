@@ -31,7 +31,7 @@ const SaleForm = () => {
 
   return (
     <Card
-      className="card-contrast shadow-sm transition hover:shadow-md"
+      className="card-contrast shadow-sm transition hover:shadow-md text-center"
       size="small"
       title="Registrar venda"
       headStyle={{ padding: "0.5rem 0" }}
