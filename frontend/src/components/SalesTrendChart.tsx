@@ -25,7 +25,7 @@ const SalesTrendChart = ({ data }: SalesTrendChartProps) => (
       <span className="text-sm text-slate-400">{data.slice(-1)[0] && `Último: ${formatCurrency(data.slice(-1)[0].total)}`}</span>
     </div>
     <ResponsiveContainer width="100%" height="100%">
-      <AreaChart data={data}>
+      <AreaChart data={data} margin={{ left: 64, right: 48, top: 32, bottom: 48 }}>
         <defs>
           <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#34d399" stopOpacity={0.9} />
@@ -33,8 +33,20 @@ const SalesTrendChart = ({ data }: SalesTrendChartProps) => (
           </linearGradient>
         </defs>
         <CartesianGrid stroke="#1f2937" strokeDasharray="3 3" />
-        <XAxis dataKey="month" tick={{ fill: "#cbd5f5" }} />
-        <YAxis tickFormatter={formatCurrency} tick={{ fill: "#cbd5f5" }} />
+        <XAxis
+          dataKey="month"
+          tick={{ fill: "#cbd5f5" }}
+          interval="preserveStartEnd"
+          tickMargin={18}
+          height={40}
+          padding={{ left: 8, right: 8 }}
+        />
+        <YAxis
+          width={110}
+          tickFormatter={formatCurrency}
+          tick={{ fill: "#cbd5f5", textAnchor: "end" }}
+          tickMargin={12}
+        />
         <Tooltip
           contentStyle={{ backgroundColor: "#0f172a", border: "none" }}
           formatter={(value: number) => formatCurrency(value)}

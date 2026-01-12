@@ -60,10 +60,6 @@ const App = () => {
               SmartMart Analytics
             </p>
             <h1 className="text-3xl font-bold sm:text-4xl">Painel executivo de varejo</h1>
-            <p className="max-w-2xl text-slate-400">
-              Monitoramos margens, tickets médios e a saúde do negócio em tempo real. Atualize os dados
-              via CSV e acompanhe as recomendações inteligentes do Smart Insights.
-            </p>
           </header>
           <DashboardOverview />
         </div>
