@@ -4,7 +4,9 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     project_name: str = "SmartMart Analytics"
-    database_url: str = f"sqlite:///{Path(__file__).resolve().parents[2] / 'smartmart.db'}"
+    base_dir: Path = Path(__file__).resolve().parents[2]
+    database_file_path: Path = base_dir / "smartmart.db"
+    database_url: str = f"sqlite:///{database_file_path}"
     pandas_chunksize: int = 10_000
 
     class Config:

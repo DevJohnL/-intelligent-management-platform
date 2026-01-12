@@ -9,6 +9,7 @@ import { useProducts } from "../../hooks/useProducts"
 import { useSalesQuantityByProduct } from "../../hooks/useSalesQuantityByProduct"
 import { useSalesTrend } from "../../hooks/useSalesTrend"
 import { useProductMonthlySalesTrend } from "../../hooks/useProductMonthlySalesTrend"
+import { downloadDatabaseCsv } from "../../services/api"
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value)
@@ -18,6 +19,7 @@ const DashboardOverview = () => {
   const { trend, isLoading: loadingTrend } = useSalesTrend()
   const { data: monthlyTrend, isLoading: loadingMonthlyTrend } = useProductMonthlySalesTrend()
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
+  const [isDownloading, setIsDownloading] = useState(false)
   const { data: products, isLoading: loadingProducts } = useProducts()
   const { data: productQuantities, isLoading: loadingProductQuantities } = useSalesQuantityByProduct()
 
@@ -75,8 +77,45 @@ const DashboardOverview = () => {
     [metrics, quantityCardValue, quantityCardHelper],
   )
 
+  const handleDownload = async () => {
+    setIsDownloading(true)
+    try {
+      const blob = await downloadDatabaseCsv()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = "smartmart-data.csv"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error(error)
+      alert("Não foi possível exportar o CSV no momento.")
+    } finally {
+      setIsDownloading(false)
+    }
+  }
+
   return (
     <section className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">
+            Exportar dados
+          </p>
+          <p className="text-lg font-semibold text-slate-900">Base completa em CSV</p>
+        </div>
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={isDownloading}
+          className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+        >
+          {isDownloading ? "Gerando CSV..." : "Exportar CSV"}
+        </button>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         {cards.map((card) => (
           <KpiCard

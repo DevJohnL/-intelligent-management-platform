@@ -71,3 +71,10 @@ export const uploadCsv = async (entity: string, file: File) => {
   return data
 }
 
+export const downloadDatabaseCsv = async () => {
+  const response = await api.get("/download/database", {
+    responseType: "blob",
+  })
+  return response.data as Blob
+}
+
