@@ -60,7 +60,7 @@ const CsvIngestForm = () => {
         </Form.Item>
         
         <Form.Item label="Arquivo">
-          <div className="flex flex-col items-center w-full">
+          <div className="flex flex-col items-center w-full gap-2">
             <Upload
               beforeUpload={handleDrop}
               accept=".csv"
@@ -68,20 +68,29 @@ const CsvIngestForm = () => {
               fileList={file ? ([file] as any) : []}
               onRemove={() => setFile(undefined)}
               listType="picture-card"
-              className="rounded-2xl border-white/10 bg-slate-900/40 !flex !flex-col !items-center !justify-center !py-0 overflow-hidden" 
+              className="rounded-2xl border-white/10 bg-slate-900/40 !flex !flex-col !items-center !justify-center !py-0 overflow-hidden"
               showUploadList={false}
             >
               <div className="flex w-full h-full flex-col items-center justify-center gap-1 text-white/90">
-                <PlusOutlined style={{ fontSize: '1.5rem' }} />
+                <PlusOutlined style={{ fontSize: "1.5rem" }} />
                 <div className="text-sm font-semibold text-center">Upload</div>
               </div>
             </Upload>
-            
+
             <p className="rounded-xl text-center">Arraste o arquivo ou clique para selecionar</p>
+
             {file && (
-              <p className="mt-1 text-xs text-white/70 text-center">
-                {file.name}
-              </p>
+              <div className="mt-2 flex items-center gap-2 rounded-full border border-white/30 bg-slate-900/30 px-3 py-1 text-[13px] text-white/80">
+                <span className="truncate max-w-[180px]">{file.name}</span>
+                <button
+                  type="button"
+                  className="rounded-full border border-white/40 px-2 text-xs leading-none transition hover:border-white hover:text-white"
+                  onClick={() => setFile(undefined)}
+                  aria-label="Remover arquivo"
+                >
+                  ×
+                </button>
+              </div>
             )}
           </div>
         </Form.Item>
