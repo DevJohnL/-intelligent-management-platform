@@ -20,6 +20,16 @@ export const fetchSales = async () => {
   return data
 }
 
+export const fetchSalesQuantityByProduct = async () => {
+  const { data } = await api.get("/sales/quantity")
+  return data
+}
+
+export const fetchSalesMonthlyQuantityTrend = async () => {
+  const { data } = await api.get("/sales/quantity-trend")
+  return data
+}
+
 export const fetchCategories = async () => {
   const { data } = await api.get("/categories")
   return data

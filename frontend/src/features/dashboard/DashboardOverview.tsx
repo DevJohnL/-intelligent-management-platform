@@ -1,9 +1,14 @@
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import KpiCard from "../../components/KpiCard"
+import ProductMonthlySalesTrendChart from "../../components/ProductMonthlySalesTrendChart"
+import ProductSalesPieChart from "../../components/ProductSalesPieChart"
 import SalesTrendChart from "../../components/SalesTrendChart"
 import { useDashboardMetrics } from "../../hooks/useDashboardMetrics"
+import { useProducts } from "../../hooks/useProducts"
+import { useSalesQuantityByProduct } from "../../hooks/useSalesQuantityByProduct"
 import { useSalesTrend } from "../../hooks/useSalesTrend"
+import { useProductMonthlySalesTrend } from "../../hooks/useProductMonthlySalesTrend"
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value)
@@ -11,6 +16,38 @@ const formatCurrency = (value: number) =>
 const DashboardOverview = () => {
   const { data: metrics, isLoading: loadingMetrics, isError } = useDashboardMetrics()
   const { trend, isLoading: loadingTrend } = useSalesTrend()
+  const { data: monthlyTrend, isLoading: loadingMonthlyTrend } = useProductMonthlySalesTrend()
+  const [selectedProductId, setSelectedProductId] = useState<number | null>(null)
+  const { data: products, isLoading: loadingProducts } = useProducts()
+  const { data: productQuantities, isLoading: loadingProductQuantities } = useSalesQuantityByProduct()
+
+  const sortedProducts = useMemo(
+    () => (products ? [...products].sort((a, b) => a.name.localeCompare(b.name, "pt-BR")) : []),
+    [products],
+  )
+
+  const quantityByProductMap = useMemo(() => {
+    const map = new Map<number, number>()
+    productQuantities?.forEach((item) => map.set(item.product_id, item.quantity))
+    return map
+  }, [productQuantities])
+
+  const selectedProductQuantity =
+    selectedProductId != null
+      ? loadingProductQuantities
+        ? undefined
+        : quantityByProductMap.get(selectedProductId) ?? 0
+      : metrics?.total_quantity
+
+  const selectedProductName =
+    selectedProductId != null ? sortedProducts.find((product) => product.id === selectedProductId)?.name : undefined
+
+  const quantityCardValue =
+    selectedProductQuantity != null ? selectedProductQuantity.toLocaleString("pt-BR") : undefined
+
+  const quantityCardHelper = selectedProductId
+    ? `Itens negociados de ${selectedProductName ?? "item selecionado"}`
+    : "Itens negociados"
 
   const cards = useMemo(
     () => [
@@ -26,8 +63,8 @@ const DashboardOverview = () => {
       },
       {
         label: "Quantidade vendida",
-        value: metrics?.total_quantity?.toLocaleString("pt-BR"),
-        helper: "Itens negociados",
+        value: quantityCardValue,
+        helper: quantityCardHelper,
       },
       {
         label: "Produto em destaque",
@@ -35,7 +72,7 @@ const DashboardOverview = () => {
         helper: "Maior faturamento",
       },
     ],
-    [metrics],
+    [metrics, quantityCardValue, quantityCardHelper],
   )
 
   return (
@@ -52,6 +89,53 @@ const DashboardOverview = () => {
         ))}
       </div>
 
+      <div className="rounded-2xl border border-slate-200 bg-white/90 p-5 shadow-sm transition hover:border-slate-300">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">Filtro</p>
+            <p className="text-lg font-semibold text-slate-900">Quantidade por item</p>
+          </div>
+          <span className="text-xs text-slate-500">
+            {loadingProducts || loadingProductQuantities
+              ? "Carregando itens..."
+              : `${productQuantities?.length ?? 0} ${productQuantities?.length === 1 ? "item" : "itens"} com vendas`}
+          </span>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <label className="text-sm font-medium text-slate-600" htmlFor="product-filter">
+            Produto
+          </label>
+          <select
+            id="product-filter"
+            value={selectedProductId ?? ""}
+            onChange={(event) => setSelectedProductId(event.target.value ? Number(event.target.value) : null)}
+            disabled={loadingProducts || loadingProductQuantities}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-slate-400 sm:w-auto"
+          >
+            <option value="">Todos os itens</option>
+            {sortedProducts.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <p className="mt-4 text-sm text-slate-500">
+          {loadingProductQuantities
+            ? "Carregando dados de vendas por item..."
+            : selectedProductId
+            ? `Total de ${selectedProductQuantity ?? 0} unidades de ${selectedProductName ?? "item selecionado"}.`
+            : "Selecione um produto para visualizar a quantidade vendida individual."}
+        </p>
+      </div>
+
+      <ProductSalesPieChart
+        data={loadingProductQuantities ? [] : productQuantities ?? []}
+        loading={loadingProductQuantities}
+      />
+
       {metrics?.alert_message && (
         <div className="rounded-2xl border border-slate-200 bg-slate-900/5 p-4 text-slate-700">
           <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">
@@ -62,6 +146,11 @@ const DashboardOverview = () => {
       )}
 
       <SalesTrendChart data={loadingTrend ? [] : trend.map(({ month, total }) => ({ month, total }))} />
+
+      <ProductMonthlySalesTrendChart
+        data={loadingMonthlyTrend ? [] : monthlyTrend ?? []}
+        loading={loadingMonthlyTrend}
+      />
 
       {isError && (
         <p className="text-center text-sm text-red-500">

@@ -63,6 +63,26 @@ class SaleRead(SaleBase):
         from_attributes = True
 
 
+class SaleQuantityByProduct(BaseModel):
+    product_id: int
+    product_name: str
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
+
+class SaleMonthlyQuantityByProduct(BaseModel):
+    product_id: int
+    product_name: str
+    period: str
+    year: int
+    month: int
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
 class DashboardMetrics(BaseModel):
     total_sales: float
     total_cost: float

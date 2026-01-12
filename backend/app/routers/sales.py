@@ -1,8 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.database import get_session
+from app.services.dashboard import (
+    build_monthly_sales_quantity_by_product,
+    build_sales_quantity_by_product,
+)
 
 router = APIRouter(prefix="/sales", tags=["sales"])
 
@@ -28,6 +34,19 @@ def create_sale(payload: schemas.SaleCreate, db: Session = Depends(get_session))
 @router.get("/", response_model=list[schemas.SaleRead])
 def list_sales(db: Session = Depends(get_session)):
     return db.query(models.Sale).order_by(models.Sale.date.desc()).all()
+
+
+@router.get("/quantity", response_model=list[schemas.SaleQuantityByProduct])
+def list_sales_quantity(
+    product_id: Optional[int] = Query(None, description="Filtra a quantidade vendida por produto específico."),
+    db: Session = Depends(get_session),
+):
+    return build_sales_quantity_by_product(db, product_id)
+
+
+@router.get("/quantity-trend", response_model=list[schemas.SaleMonthlyQuantityByProduct])
+def list_sales_quantity_trend(db: Session = Depends(get_session)):
+    return build_monthly_sales_quantity_by_product(db)
 
 
 @router.get("/{sale_id}", response_model=schemas.SaleRead)

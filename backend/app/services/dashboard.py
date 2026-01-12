@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import Integer, cast, func, select
 from sqlalchemy.orm import Session
 
 from app import models
@@ -66,3 +66,64 @@ def _build_margin_alert(db: Session) -> Optional[str]:
                 return f"A margem de {name} caiu abaixo de 20%; revisar custo."
     return None
 
+
+def build_monthly_sales_quantity_by_product(db: Session) -> list[dict]:
+    period_label = func.strftime("%Y-%m", models.Sale.date)
+    year_label = func.strftime("%Y", models.Sale.date)
+    month_label = func.strftime("%m", models.Sale.date)
+
+    rows = (
+        db.execute(
+            select(
+                models.Product.id.label("product_id"),
+                models.Product.name.label("product_name"),
+                period_label.label("period"),
+                cast(year_label, Integer).label("year"),
+                cast(month_label, Integer).label("month"),
+                func.coalesce(func.sum(models.Sale.quantity), 0).label("quantity"),
+            )
+            .join(models.Sale)
+            .group_by(models.Product.id, period_label)
+            .order_by(period_label, models.Product.name)
+        )
+        .all()
+    )
+
+    return [
+        {
+            "product_id": row.product_id,
+            "product_name": row.product_name,
+            "period": row.period,
+            "year": int(row.year) if row.year is not None else 0,
+            "month": int(row.month) if row.month is not None else 0,
+            "quantity": int(row.quantity or 0),
+        }
+        for row in rows
+    ]
+
+
+def build_sales_quantity_by_product(db: Session, product_id: Optional[int] = None) -> list[dict]:
+    query = (
+        select(
+            models.Product.id.label("product_id"),
+            models.Product.name.label("product_name"),
+            func.coalesce(func.sum(models.Sale.quantity), 0).label("quantity"),
+        )
+        .join(models.Sale)
+        .group_by(models.Product.id)
+        .order_by(models.Product.name)
+    )
+
+    if product_id is not None:
+        query = query.where(models.Product.id == product_id)
+
+    rows = db.execute(query).all()
+
+    return [
+        {
+            "product_id": row.product_id,
+            "product_name": row.product_name,
+            "quantity": int(row.quantity or 0),
+        }
+        for row in rows
+    ]
